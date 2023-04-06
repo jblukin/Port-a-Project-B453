@@ -7,7 +7,6 @@ public class PlayerScript : MonoBehaviour
     private int moveSpeed;
     private float horizontal;
     private bool hasDoubleJump;
-    private bool facingRight;
     private bool isGrounded;
 
     [SerializeField] private Rigidbody2D rb;
@@ -20,7 +19,6 @@ public class PlayerScript : MonoBehaviour
     void Start()
     {
         moveSpeed = 7;
-        facingRight = true;
         hasDoubleJump = true;
         isGrounded = true;
     }
@@ -51,9 +49,22 @@ public class PlayerScript : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, 5f);
             hasDoubleJump = false;
         }
+
+
+        if(Input.GetButtonUp("YangAttack")) {
+            animator.SetBool("IsYang", true);
+            YangAttack();
+        }
+        if (Input.GetButtonUp("YinAttack")) {
+            animator.SetBool("IsYang", false);
+        }
     }   
 
     bool IsGrounded() {
         return Physics2D.OverlapCircle(groundCheck.position, .1f, groundLayers);
+    }
+
+    private void YangAttack() {
+        
     }
 }
