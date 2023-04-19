@@ -52,10 +52,17 @@ public class PlayerScript : MonoBehaviour
 
     // Update is called once per fram6f
     void Update()
+<<<<<<< Updated upstream
     {
         bar.SetActive(false);
         bar.transform.GetChild(0).GetComponent<Image>().fillAmount = timer / 1;
 
+=======
+    {   
+        
+
+        
+>>>>>>> Stashed changes
         shadowOpac = 1 - ((transform.position.y - st) / (apex - st));
         shadow.transform.position = new Vector3(transform.position.x, st - .6f, transform.position.z + 1);    
         shadow.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, shadowOpac);
@@ -95,6 +102,18 @@ public class PlayerScript : MonoBehaviour
             isYang = true;
             animEnd = false;
 
+            AnimatorClipInfo[] currentClip;
+            currentClip = animator.GetCurrentAnimatorClipInfo(0);
+            
+            if(currentClip[0].clip.name == "yang_left" && !animEnd) {
+                animator.StopPlayback();
+                animator.SetBool("RightPunch", true);
+                animator.SetBool("LeftPunch", false);
+            }else {
+                animator.StopPlayback();
+                animator.SetBool("RightPunch", false);
+                animator.SetBool("LeftPunch", true);
+            }
             //check here what anim is playing,
             //if left is playing, switch to right and vice versa
             //do collides here as well
@@ -154,5 +173,19 @@ public class PlayerScript : MonoBehaviour
 
     private void YangAnimEnd() {
         animEnd = true;
+<<<<<<< Updated upstream
+=======
+        
+        animator.SetBool("RightPunch", false);
+        animator.SetBool("LeftPunch", false);
+        //start upercut here
+        animator.SetBool("Uppercut", true);
+        
+>>>>>>> Stashed changes
     }
+
+    private void EndUpper() {
+        animator.SetBool("Uppercut", false);
+    }
+
 }
