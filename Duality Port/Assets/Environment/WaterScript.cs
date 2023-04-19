@@ -5,7 +5,6 @@ using UnityEngine;
 public class WaterScript : MonoBehaviour
 {
     [SerializeField] GameObject layer1;
-    [SerializeField] GameObject layer2;
     [SerializeField] GameObject layer3;
 
     [SerializeField] Transform Water;
@@ -24,8 +23,7 @@ public class WaterScript : MonoBehaviour
     void Update()
     {   
         layer1.transform.position = calcPos(0, .15f);
-        layer2.transform.position = calcPos(1.25f, .1f);
-        layer3.transform.position = calcPos(2.5f, .05f);
+        layer3.transform.position = calcPos(1.25f, .1f);
         
     }
 

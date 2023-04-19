@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {   
@@ -8,13 +9,13 @@ public class PlayerScript : MonoBehaviour
     private float charge;
     private float horizontal;
     private float slideSpeed;
+    private float jumpHeight;
     private bool isCharging;
     private bool hasDoubleJump;
     private bool isGrounded;
     private bool isLunging;
     private bool facingRight;
     public bool isYang;
-
     public bool animEnd;
 
     [SerializeField] float timer;
@@ -26,9 +27,11 @@ public class PlayerScript : MonoBehaviour
     
     [SerializeField] Animator animator;
     [SerializeField] GameObject shadow;
+    [SerializeField] GameObject bar;
 
-    private float apex = 4.05f, st = 2.275f;//Hard coded values, if position of object change, this needs to as well
+    private float apex = 5.45f, st = 2.275f;//Hard coded values, if position of object change, this needs to as well
     
+    public float max = 0f;
     private float shadowOpac;
     
 
@@ -38,6 +41,7 @@ public class PlayerScript : MonoBehaviour
         moveSpeed = 7;
         timer = 0;
         slideSpeed = 6.5f;
+        jumpHeight = 8f;
         hasDoubleJump = true;
         isGrounded = true;
         isCharging = false;
@@ -48,7 +52,10 @@ public class PlayerScript : MonoBehaviour
 
     // Update is called once per fram6f
     void Update()
-    {   
+    {
+        bar.SetActive(false);
+        bar.transform.GetChild(0).GetComponent<Image>().fillAmount = timer / 1;
+
         shadowOpac = 1 - ((transform.position.y - st) / (apex - st));
         shadow.transform.position = new Vector3(transform.position.x, st - .6f, transform.position.z + 1);    
         shadow.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, shadowOpac);
@@ -76,9 +83,9 @@ public class PlayerScript : MonoBehaviour
         }
 
         if (Input.GetButtonUp("Jump") && isGrounded) {
-            rb.velocity = new Vector2(rb.velocity.x, 6f);
+            rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
         }else if (Input.GetButtonUp("Jump") && hasDoubleJump) {
-            rb.velocity = new Vector2(rb.velocity.x, 5f);
+            rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
             hasDoubleJump = false;
         }
 
@@ -93,6 +100,7 @@ public class PlayerScript : MonoBehaviour
             //do collides here as well
         }
         if (Input.GetButton("YinAttack")) {
+            bar.SetActive(true);
             animator.SetBool("IsYang", false);
             rb.velocity = new Vector2(0, 0);
             animator.SetFloat("Velocity", 0);
@@ -134,20 +142,8 @@ public class PlayerScript : MonoBehaviour
                 charge = 0;
                 animator.SetBool("IsLunging", false);
             }
-        }
-
-
-        //pther attack
-        //anim1, left punch
-        //anim2, right punch
-        //once anim1 is done, go to 2
-        //animator event at end of 2,
-        //if button pressed at any time, go back to anim1
-        //if event, do uppercut
-
-          
+        } 
     }   
-
     bool IsGrounded() {
         return Physics2D.OverlapCircle(groundCheck.position, .1f, groundLayers);
     }
@@ -158,6 +154,5 @@ public class PlayerScript : MonoBehaviour
 
     private void YangAnimEnd() {
         animEnd = true;
-        //start upercut here
     }
 }
