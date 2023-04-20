@@ -151,6 +151,7 @@ public class UIManager : MonoBehaviour
     {
         
         _ContainerReferences[0].SetActive(false);
+        this.gameObject.SendMessage("StartGame");
 
     }
 
