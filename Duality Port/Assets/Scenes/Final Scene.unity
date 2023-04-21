@@ -7941,6 +7941,7 @@ MonoBehaviour:
   - {fileID: 1142398067}
   - {fileID: 1241061327}
   - {fileID: 874190404}
+  _playing: 0
 --- !u!4 &1297583704
 Transform:
   m_ObjectHideFlags: 0
@@ -7968,6 +7969,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefabs: []
+  playerReference: {fileID: 1389173824}
 --- !u!1 &1307208451
 GameObject:
   m_ObjectHideFlags: 0

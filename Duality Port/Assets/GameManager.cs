@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject[] enemyPrefabs;
 
+    [SerializeField] private GameObject playerReference;
+
     private Transform[] enemySpawnPoints;
 
     private int totalEnemiesKilled;
@@ -18,7 +20,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        playerReference.SetActive(false);
     }
 
     // Update is called once per frame
@@ -28,14 +30,16 @@ public class GameManager : MonoBehaviour
     }
 
 
-    void StartGame()
+    public void StartGame()
     {
 
         RunGame();
 
+        playerReference.SetActive(true);
+
     }
 
-    void RunGame()
+    void RunGame() //During Rounds
     {
 
         //spawn enemies periodically until ==enemiesRemaing
@@ -45,7 +49,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void UpdateGame()
+    void UpdateGame() //Change Info between rounds
     {
 
         //reset and increase enemiesRemaining

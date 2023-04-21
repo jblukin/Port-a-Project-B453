@@ -13,7 +13,7 @@ public class UIManager : MonoBehaviour
 
     private int _currentMenuIndex;
 
-    private bool _playing;
+    public bool _playing;
 
     private bool _onMainMenu;
 
@@ -151,7 +151,7 @@ public class UIManager : MonoBehaviour
     {
         
         _ContainerReferences[0].SetActive(false);
-        this.gameObject.SendMessage("StartGame");
+        this.gameObject.GetComponent<GameManager>().StartGame();
 
     }
 
