@@ -101,7 +101,8 @@ public class BasicEnemyController : MonoBehaviour
         walking = true;
         stunned = false;
 
-        transform.position = Vector2.MoveTowards(transform.position, playerReference.transform.position, speed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(new Vector2(transform.position.x, 2.4f /*Hard-coded ground Y-pos*/), 
+        new Vector2(playerReference.transform.position.x, 2.4f /*Hard-coded ground Y-pos*/), speed * Time.deltaTime);
 
     }
 
@@ -118,7 +119,16 @@ public class BasicEnemyController : MonoBehaviour
 
             if(collider.gameObject.CompareTag("Player")) {
 
-                playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit, 0.0f, 0.0f));
+                if(playerReference.GetComponent<PlayerScript>().isYang) //Black Player
+                    if(colorVal) //Black Enemy - Less Damage Against Player
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, knockbackDistance, stunDuration));
+                    else //White Enemy - Extra Damage Against Player
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, knockbackDistance, stunDuration));
+                else //White Player
+                    if(colorVal) //Black Enemy - Extra Damage Against Player
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, knockbackDistance, stunDuration));
+                    else //White Enemy - Less Damage Against Player
+                         playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, knockbackDistance, stunDuration));
 
             }
 
@@ -178,18 +188,26 @@ public class BasicEnemyController : MonoBehaviour
 
         health-=data.damagePerHit; //damage
 
-        if(health<=0.0f)
+        GameObject.Find("GameManager").GetComponent<GameManager>().totalDamageDealt += data.damagePerHit;
+
+        if(health<=0.0f) {
+
+            GameObject.Find("GameManager").GetComponent<GameManager>().totalEnemiesKilled++;
+
             Destroy(this.gameObject);
+
+        }
 
         GetStunned(data.stunDuration); //stun
         
-        transform.position-=new Vector3(data.knockbackDistance, data.knockbackDistance/2, 0.0f); //knockback
+        transform.position-=new Vector3(data.knockbackDistance/2f, data.knockbackDistance/1.25f, 0.0f); //knockback
 
         UpdateHealthBar();
 
     }
 
-    private void UpdateHealthBar() {
+    private void UpdateHealthBar() 
+    {
 
         canvasReference.SetActive(true);
 
@@ -199,7 +217,8 @@ public class BasicEnemyController : MonoBehaviour
 
     }
 
-    IEnumerator HealthBarDisplayTimer() {
+    private IEnumerator HealthBarDisplayTimer() 
+    {
 
         yield return new WaitForSeconds(0.75f);
         canvasReference.SetActive(false);

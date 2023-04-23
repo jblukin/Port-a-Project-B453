@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2116179563}
   - component: {fileID: 2116179565}
   - component: {fileID: 2116179564}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: HealthBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 2612861134634009129}
   - component: {fileID: 740679596950620121}
   - component: {fileID: 6664859047599636786}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: HealthBarBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -159,7 +159,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5595529055551159899}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,8 @@ GameObject:
   - component: {fileID: 5595529056548860051}
   - component: {fileID: 5595529056548860050}
   - component: {fileID: 5595529055529338096}
-  m_Layer: 0
+  - component: {fileID: -7743265121268414711}
+  m_Layer: 7
   m_Name: BasicEnemyBlack
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -259,7 +260,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: b6feb4be82c2e6f4ab93a9de71599db6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -310,6 +311,22 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!70 &-7743265121268414711
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5595529056548860053}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 0.4, y: 0.64}
+  m_Direction: 0
 --- !u!1 &7116555610684650366
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,7 +337,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7619420023906367391}
   - component: {fileID: 6871394770980311056}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}

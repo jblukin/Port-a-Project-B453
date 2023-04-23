@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 431949395}
   - component: {fileID: 431949397}
   - component: {fileID: 431949396}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: HealthBarBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 552165189}
   - component: {fileID: 552165191}
   - component: {fileID: 552165190}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: HealthBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -160,7 +160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 593371482}
   - component: {fileID: 593371483}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,7 +221,8 @@ GameObject:
   - component: {fileID: 9148035742759196967}
   - component: {fileID: 9148035742759196966}
   - component: {fileID: 6240277945328915974}
-  m_Layer: 0
+  - component: {fileID: 1702559425194761283}
+  m_Layer: 7
   m_Name: PoleEnemyWhite
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -283,7 +284,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 1d3417d5556bb5149b01618c3be3a4a0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -334,6 +335,22 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!70 &1702559425194761283
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9148035742759196961}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 0.4, y: 0.64}
+  m_Direction: 0
 --- !u!1 &9148035743716038638
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,7 +360,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9148035743716038639}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
