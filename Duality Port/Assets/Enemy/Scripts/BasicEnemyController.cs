@@ -1,11 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BasicEnemyController : MonoBehaviour
 {
 
     private GameObject playerReference;
+
+    private GameObject healthBarReference;
+
+    private GameObject canvasReference;
 
     private Transform attackPoint;
 
@@ -16,6 +21,10 @@ public class BasicEnemyController : MonoBehaviour
     [SerializeField] private float rateOfAttack;
 
     private float attackTimer;
+
+    private float health;
+
+    [SerializeField] private float maxHealth;
 
     [SerializeField] private float damagePerHit;
 
@@ -31,7 +40,7 @@ public class BasicEnemyController : MonoBehaviour
 
     private bool stunned;
 
-    public bool colorVal; // true = black, false = white
+    [SerializeField] private bool colorVal; // true = black, false = white
 
 
     // Start is called before the first frame update
@@ -40,11 +49,19 @@ public class BasicEnemyController : MonoBehaviour
         
         playerReference = GameObject.FindGameObjectWithTag("Player");
 
+        canvasReference = transform.Find("Canvas").gameObject;
+
+        healthBarReference = transform.Find("Canvas/HealthBar").gameObject;
+
+        canvasReference.SetActive(false);
+
         attackPoint = transform.Find("AttackPoint");
 
         attackTimer = 0.0f;
 
         anim = transform.GetComponent<Animator>();
+
+        health = maxHealth;
 
     }
 
@@ -56,7 +73,6 @@ public class BasicEnemyController : MonoBehaviour
         if(playerReference == null) {
 
             playerReference = GameObject.FindGameObjectWithTag("Player");
-            Debug.Log("PlayerReference");
 
         }
 
@@ -85,7 +101,8 @@ public class BasicEnemyController : MonoBehaviour
         walking = true;
         stunned = false;
 
-        transform.position = Vector2.MoveTowards(transform.position, playerReference.transform.position, speed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(new Vector2(transform.position.x, 2.4f /*Hard-coded ground Y-pos*/), 
+        new Vector2(playerReference.transform.position.x, 2.4f /*Hard-coded ground Y-pos*/), speed * Time.deltaTime);
 
     }
 
@@ -102,7 +119,16 @@ public class BasicEnemyController : MonoBehaviour
 
             if(collider.gameObject.CompareTag("Player")) {
 
-                playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit, 0.0f, 0.0f));
+                if(playerReference.GetComponent<PlayerScript>().isYang) //Black Player
+                    if(colorVal) //Black Enemy - Less Damage Against Player
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, knockbackDistance, stunDuration));
+                    else //White Enemy - Extra Damage Against Player
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, knockbackDistance, stunDuration));
+                else //White Player
+                    if(colorVal) //Black Enemy - Extra Damage Against Player
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, knockbackDistance, stunDuration));
+                    else //White Enemy - Less Damage Against Player
+                         playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, knockbackDistance, stunDuration));
 
             }
 
@@ -160,14 +186,42 @@ public class BasicEnemyController : MonoBehaviour
     private void TakeDamage(AttackData data) //To be used in a SendMessage when player hits enemy
     {
 
-        // _health-=data.damagePerHit;
+        health-=data.damagePerHit; //damage
 
-        // if(_health<=0.0f)
-        //     Destroy(this.gameObject);
+        GameObject.Find("GameManager").GetComponent<GameManager>().totalDamageDealt += data.damagePerHit;
 
-        GetStunned(data.stunDuration);
+        if(health<=0.0f) {
+
+            GameObject.Find("GameManager").GetComponent<GameManager>().totalEnemiesKilled++;
+
+            Destroy(this.gameObject);
+
+        }
+
+        GetStunned(data.stunDuration); //stun
         
-        transform.position-=new Vector3(data.knockbackDistance, data.knockbackDistance/2, 0.0f);
+        transform.position-=new Vector3(data.knockbackDistance/2f, data.knockbackDistance/1.25f, 0.0f); //knockback
+
+        UpdateHealthBar();
+
+    }
+
+    private void UpdateHealthBar() 
+    {
+
+        canvasReference.SetActive(true);
+
+        healthBarReference.GetComponent<Image>().fillAmount = health / maxHealth;
+
+        StartCoroutine(HealthBarDisplayTimer());
+
+    }
+
+    private IEnumerator HealthBarDisplayTimer() 
+    {
+
+        yield return new WaitForSeconds(0.75f);
+        canvasReference.SetActive(false);
 
     }
 
@@ -179,7 +233,6 @@ public class BasicEnemyController : MonoBehaviour
         walking = false;
         StartCoroutine(stunTimer(duration));
 
-
     }
 
     private IEnumerator stunTimer(float duration) 
@@ -188,6 +241,12 @@ public class BasicEnemyController : MonoBehaviour
         yield return new WaitForSeconds(duration);
         stunned = false;
 
+    }
+
+    public bool GetColorVal() { 
+        
+        return colorVal;
+    
     }
 
 }

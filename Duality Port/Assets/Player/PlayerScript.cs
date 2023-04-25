@@ -160,8 +160,8 @@ public class PlayerScript : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheck.position, .1f, groundLayers);
     }
 
-    private void TakeData() {
-        
+    private void TakeDamage(AttackData attackData) {
+        Debug.Log("Damage Recieved: " + attackData.damagePerHit + " - Knockback Recieved: " + attackData.knockbackDistance + " - Stun Duration Recieved: " + attackData.stunDuration);
     }
 
     private void YangAnimEnd() {

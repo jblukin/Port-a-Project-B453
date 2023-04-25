@@ -2,20 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject[] _menuItems = new GameObject[5];
+    [SerializeField] private GameObject[] _menuItems = new GameObject[5]; //Main Menu Items
 
     [SerializeField] private Sprite[] _menuItemSprites = new Sprite[2];
+    /* 0 = Unhighlighted Sprite, 1 = Highlighted Sprite */
 
-    [SerializeField] private GameObject[] _ContainerReferences = new GameObject[5];
+    [SerializeField] private GameObject[] _ContainerReferences = new GameObject[8];
+    /* 0 = Entire UI Container, 1 = Main Menu Container, 2 = Tutorial Container, 3 = Story Container, 
+        4 = Credits Container, 5 = End Game UI Container, 6 = In Between Rounds UI Container, 7 = HUD Container */
+
+    [SerializeField] private GameObject[] _gameOverMenuItems = new GameObject[3]; //Game Over Menu Items
+
+    [SerializeField] private GameObject[] _resultsTextReferences = new GameObject[3]; //End Game UI text references
+
+    [SerializeField] private GameObject[] _betweenRoundUITextReferences = new GameObject[3]; //In Between Round UI text references
+
+    [SerializeField] private GameObject _betweenRoundUICountdownBarRef; //In Between Round UI Fill Bar reference
+
+    [SerializeField] private GameObject[] _HUDTextReferences = new GameObject[2]; //HUD text references
 
     private int _currentMenuIndex;
 
-    private bool _playing;
+    public bool playing { get; private set; }
 
     private bool _onMainMenu;
+
+    private bool _onMenuList;
+
+    private float _maxCountdownDuration, _countdownDuration;
 
     // Start is called before the first frame update
     void Start()
@@ -23,9 +41,11 @@ public class UIManager : MonoBehaviour
         
         _currentMenuIndex = 0;
 
-        _playing = false;
+        playing = false;
 
         _onMainMenu = true;
+
+        _onMenuList = true;
 
     }
 
@@ -40,7 +60,7 @@ public class UIManager : MonoBehaviour
     void NavigateMenu()
     {
 
-        if(!_playing)
+        if(!playing && _onMainMenu)
             if(Input.GetKeyDown(KeyCode.W)) {
 
 
@@ -86,23 +106,81 @@ public class UIManager : MonoBehaviour
                     
 
             } else if(Input.GetKeyDown(KeyCode.J))
-                if(_onMainMenu)
+                if(_onMainMenu && _onMenuList)
                     SelectOption(_currentMenuIndex);
-                else
+                else if(_onMainMenu && !_onMenuList)
                     OpenMainMenu();
+        
+            else NavigateGameOverMenu();
             
+
+    }
+
+    void NavigateGameOverMenu()
+    {
+
+        if(!playing && !_onMainMenu) {
+
+            if(Input.GetKeyDown(KeyCode.W)) {
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[0];
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
+                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+
+
+
+                _currentMenuIndex = SwitchMenuItem(true);
+
+
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[1];
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
+                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+
+            } else if(Input.GetKeyDown(KeyCode.S)) {
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[0];
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
+                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+
+
+
+                _currentMenuIndex = SwitchMenuItem(false);
+
+
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[1];
+
+                _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
+                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+
+            } else if(Input.GetKeyDown(KeyCode.J))
+                if(_currentMenuIndex == 0)
+                    StartGame();
+                else if(_currentMenuIndex == 1)
+                    OpenMainMenu();
+                else if(_currentMenuIndex == 2)
+                    Application.Quit();
+        }
 
     }
 
     int SwitchMenuItem(bool UpOrDown) //If recieves true, selected menu item-1 [MOVES UP MENU - bottom to top] (if false, menu item+1)
     {
-        if(UpOrDown && _currentMenuIndex == 0)
+        if(UpOrDown && _currentMenuIndex == 0 && _onMainMenu) //sets menu index to last menu item on main menu
             return 4;
-        else if(!UpOrDown && _currentMenuIndex == 4)
+        else if(!UpOrDown && _currentMenuIndex == 4 && _onMainMenu) //sets menu index to first menu item on main menu
             return 0;
-        else if(UpOrDown)
+        else if(UpOrDown && _currentMenuIndex == 0 && !_onMainMenu) //set menu index to last menu item on game over screen
+            return 2;
+        else if(!UpOrDown && _currentMenuIndex == 2 && !_onMainMenu) //sets menu index to first menu item on game over screen
+            return 0;
+        else if(UpOrDown) //moves menu item up by 1
             return _currentMenuIndex-1;
-        else
+        else //moves menu item down by 1
             return _currentMenuIndex+1;
 
     }
@@ -114,7 +192,11 @@ public class UIManager : MonoBehaviour
             
             StartGame(); 
 
-            _playing = true;
+            playing = true;
+
+            _onMainMenu = false;
+
+            _onMenuList = false;
 
         }
             
@@ -122,7 +204,7 @@ public class UIManager : MonoBehaviour
 
             OpenTutorial();
 
-            _onMainMenu = false;
+            _onMenuList = false;
 
         }
             
@@ -130,7 +212,7 @@ public class UIManager : MonoBehaviour
 
             OpenStory();
 
-            _onMainMenu = false;
+            _onMenuList = false;
 
         }
             
@@ -138,7 +220,7 @@ public class UIManager : MonoBehaviour
 
             OpenCredits();
 
-            _onMainMenu = false;
+            _onMenuList = false;
 
         }
             
@@ -150,8 +232,9 @@ public class UIManager : MonoBehaviour
     void StartGame()
     {
         
-        _ContainerReferences[0].SetActive(false);
-
+        OpenHUD();
+        this.gameObject.GetComponent<GameManager>().StartGame();
+        
     }
 
     void OpenTutorial()
@@ -193,6 +276,145 @@ public class UIManager : MonoBehaviour
         _ContainerReferences[4].SetActive(false);
 
         _onMainMenu = true;
+
+        _onMenuList = true;
+
+    }
+
+    void OpenHUD()
+    {
+
+        _ContainerReferences[1].SetActive(false);
+        _ContainerReferences[2].SetActive(false);
+        _ContainerReferences[3].SetActive(false);
+        _ContainerReferences[4].SetActive(false);
+        _ContainerReferences[5].SetActive(false);
+        _ContainerReferences[6].SetActive(false);
+        _ContainerReferences[7].SetActive(true);
+
+    }
+
+    void RunInBetweenRoundUI(float countdownDuration)
+    {
+
+        Debug.Log("Running in between rounds");
+
+        _maxCountdownDuration = countdownDuration;
+
+        _countdownDuration = _maxCountdownDuration;
+
+        _ContainerReferences[6].SetActive(true);
+
+        StartCoroutine(InBetweenRoundInitialTextTimer(_maxCountdownDuration));
+
+    }
+
+    public void UpdateHUD(int round, int enemyCount)
+    {
+
+        _HUDTextReferences[0].GetComponent<TextMeshProUGUI>().text = "Round: " + round;
+
+        _HUDTextReferences[1].GetComponent<TextMeshProUGUI>().text = "Foes: " + enemyCount;
+
+    }
+
+    private IEnumerator InBetweenRoundInitialTextTimer(float duration) //Shows Clear Round Text, then starts Round Countdown
+    {
+        if(GameObject.Find("GameManager").GetComponent<GameManager>().currentRound == 1) {
+
+            _betweenRoundUITextReferences[0].SetActive(false); //Initial Text Inactive
+
+            _betweenRoundUITextReferences[1].SetActive(false); //Secondary Text Inactive
+
+            _betweenRoundUITextReferences[2].SetActive(false); //Tertiary Text Inactive
+
+        } else {
+
+            _betweenRoundUITextReferences[0].SetActive(true); //Initial Text Active
+
+            _betweenRoundUITextReferences[1].SetActive(false); //Secondary Text Inactive
+
+            _betweenRoundUITextReferences[2].SetActive(false); //Tertiary Text Inactive
+
+        }
+
+        yield return new WaitForSeconds(1.0f); //Wait
+
+        _betweenRoundUITextReferences[0].SetActive(false); //Initial Text Inactive
+
+        _betweenRoundUITextReferences[1].SetActive(true);  //Secondary Text Active
+
+        //Tertiary Text remains Inactive
+
+        StartCoroutine(RoundStartCountdownTimer(duration)); //Start Round Begin Countdown
+
+    }
+
+    private IEnumerator RoundStartCountdownTimer(float duration) //Counts down to start of round, and displays the countdown in a decreasing progress bar - starts tertiary text display sequence at end
+    {
+
+        InvokeRepeating("AdjustCountdownBarFillAmount", 0.0f, Time.deltaTime);
+
+        yield return new WaitForSeconds(duration);
+
+        CancelInvoke("AdjustCountdownBarFillAmount");
+
+        StartCoroutine(InBetweenRoundTertiaryTextTimer());
+
+        this.gameObject.SendMessage("RunGame");
+
+    }
+
+    void AdjustCountdownBarFillAmount()
+    {
+
+        _countdownDuration -= Time.deltaTime;
+
+        _betweenRoundUICountdownBarRef.GetComponent<Image>().fillAmount = (_countdownDuration / _maxCountdownDuration);
+
+    }
+
+    private IEnumerator InBetweenRoundTertiaryTextTimer() //Displays round start text briefly, then resets In Between Round UI and closes it
+    {
+        _betweenRoundUITextReferences[0].SetActive(false); //Initial Text Inactive
+
+        _betweenRoundUITextReferences[1].SetActive(false); //Secondary Text Inactive
+
+        _betweenRoundUITextReferences[2].SetActive(true); //Tertiary Text Active
+
+        _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(false); //Countdown Bar Inactive
+
+        yield return new WaitForSeconds(1.0f); //Wait
+
+        _betweenRoundUITextReferences[0].SetActive(true); //Initial Text Active
+
+        _betweenRoundUITextReferences[1].SetActive(false);  //Secondary Text Inactive
+
+        _betweenRoundUITextReferences[2].SetActive(false); //Tertiary Text Inactive
+
+        _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(true); //Countdown Bar Active
+
+        _ContainerReferences[6].SetActive(false); //Container Inactive/Closed
+
+    }
+    void OpenEndGameScreen() //To be used in SendMessage from GameManager
+    {
+
+        _currentMenuIndex = 0;
+
+        playing = false;
+
+        _onMainMenu = false;
+
+        _resultsTextReferences[0].GetComponent<TextMeshProUGUI>().text = "ROUNDS CLEARED: " + (this.gameObject.GetComponent<GameManager>().currentRound - 1);
+
+        _resultsTextReferences[1].GetComponent<TextMeshProUGUI>().text = "FOES DEFEATED: " + this.gameObject.GetComponent<GameManager>().totalEnemiesKilled;
+
+        _resultsTextReferences[2].GetComponent<TextMeshProUGUI>().text = "DAMAGE DEALT: " + this.gameObject.GetComponent<GameManager>().totalDamageDealt;
+
+        _ContainerReferences[7].SetActive(false);
+
+        _ContainerReferences[5].SetActive(true);
 
     }
 
