@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform[] enemySpawnerTransforms = new Transform[2];
 
     [SerializeField] private GameObject playerReference;
+    [SerializeField] private GameObject orbReference;
 
     private Transform[] enemySpawnPoints = new Transform[2];
 
@@ -42,6 +43,8 @@ public class GameManager : MonoBehaviour
     {
 
         playerReference.SetActive(true);
+
+        orbReference.SetActive(true);
 
         UpdateGame();
 
@@ -93,7 +96,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void EndGame() //To be used in SendMessage when player dies
+    public void EndGame() //To be used in SendMessage when player dies
     {
 
         this.gameObject.SendMessage("OpenEndGameScreen");

@@ -183,7 +183,7 @@ public class BasicEnemyController : MonoBehaviour
 
     }
 
-    private void TakeDamage(AttackData data) //To be used in a SendMessage when player hits enemy
+    public void TakeDamage(AttackData data) //To be used in a SendMessage when player hits enemy
     {
 
         health-=data.damagePerHit; //damage
@@ -247,6 +247,10 @@ public class BasicEnemyController : MonoBehaviour
         
         return colorVal;
     
+    }
+
+    public bool isStunned() {
+        return stunned;
     }
 
 }

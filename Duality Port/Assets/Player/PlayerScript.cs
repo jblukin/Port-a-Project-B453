@@ -6,17 +6,24 @@ using UnityEngine.UI;
 public class PlayerScript : MonoBehaviour
 {   
     private int moveSpeed;
+    private int dir;
+    private float health;
     private float charge;
     private float horizontal;
     private float slideSpeed;
     private float jumpHeight;
+    private float hitRate;
+    private float nextHit;
     private bool isCharging;
     private bool hasDoubleJump;
     private bool isGrounded;
     private bool isLunging;
+    private bool isPunching;
     private bool facingRight;
     public bool isYang;
     public bool animEnd;
+    private bool stunned;
+    private AudioSource aS;
 
     [SerializeField] float timer;
     [SerializeField] private Rigidbody2D rb;
@@ -25,7 +32,11 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private LayerMask groundLayers;
     [SerializeField] private LayerMask enemyLayers;
     
+    [SerializeField] AudioClip[] clips;
+    
     [SerializeField] Animator animator;
+    [SerializeField] Animator orbAni;
+    [SerializeField] GameObject orbObject;
     [SerializeField] GameObject shadow;
     [SerializeField] GameObject bar;
 
@@ -37,22 +48,36 @@ public class PlayerScript : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
-    {
+    {   
+        health = 100f;
         moveSpeed = 7;
         timer = 0;
         slideSpeed = 6.5f;
         jumpHeight = 8f;
+        hitRate = 1f;
+        nextHit = Time.time;
         hasDoubleJump = true;
         isGrounded = true;
         isCharging = false;
         isLunging = false;
         isYang = false;
         animEnd = true;
+        stunned = false;
+        aS = GetComponent<AudioSource>();
     }
 
     // Update is called once per fram6f
     void Update()
-    {
+    {   
+        SetOrbPos();
+
+        
+        if (!isCharging && !isLunging && !isPunching) {
+            aS.Stop();
+        }
+        
+        dir = facingRight ? 1 : -1;
+
         bar.SetActive(false);
         bar.transform.GetChild(0).GetComponent<Image>().fillAmount = timer / 1;
 
@@ -91,6 +116,14 @@ public class PlayerScript : MonoBehaviour
 
 
         if(Input.GetButton("YangAttack")) {
+            orbAni.SetBool("isYang", true);
+            hitRate = .5f;
+            isPunching = true;
+            aS.Stop();
+            if (!aS.isPlaying) {
+                aS.clip = clips[Random.Range(2, 5)];
+                aS.Play();
+            }
             animator.SetBool("IsYang", true);
             isYang = true;
             animEnd = false;
@@ -107,11 +140,26 @@ public class PlayerScript : MonoBehaviour
                 animator.SetBool("RightPunch", false);
                 animator.SetBool("LeftPunch", true);
             }
-            //check here what anim is playing,
-            //if left is playing, switch to right and vice versa
-            //do collides here as well
+            
+            if (Time.time >= nextHit) {
+                Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, .5f, enemyLayers);
+                foreach(Collider2D enemy in hitEnemies) {
+                    BasicEnemyController currE = enemy.GetComponent<BasicEnemyController>();
+                    float dmg = enemy.GetComponent<BasicEnemyController>().GetColorVal() ? 5f : 2f;
+                    currE.TakeDamage(new AttackData(dmg, .5f, .4f));
+                }
+
+                nextHit = Time.time + hitRate;
+            }
         }
         if (Input.GetButton("YinAttack")) {
+            orbAni.SetBool("isYang", false);
+            hitRate = 1f;
+            if(!aS.isPlaying) {
+                aS.clip = clips[0];
+                aS.Play();
+            }
+        
             bar.SetActive(true);
             animator.SetBool("IsYang", false);
             rb.velocity = new Vector2(0, 0);
@@ -132,20 +180,30 @@ public class PlayerScript : MonoBehaviour
             animator.SetBool("IsCharging", false);
             isLunging = true;
             animator.SetBool("IsLunging", true);
+            
+            aS.Stop();
+            aS.clip = clips[1];
+            aS.Play();
         }
         
         if(isLunging) {
             timer += Time.deltaTime;
-            int dir = facingRight ? 1 : -1;
+            
             rb.velocity = new Vector2(slideSpeed * charge * dir, rb.velocity.y);
 
-
+            
             Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, .5f, enemyLayers);
             foreach(Collider2D enemy in hitEnemies) {
-                Debug.Log("hit ene" + enemy.name);
-
-                //HERE CHECK WHAT COLOR ENEMIES ARE AND DO CALCS FOR DAMAGE
+                BasicEnemyController e = enemy.GetComponent<BasicEnemyController>();
+                if (e.isStunned()) {
+                    break;
+                }
+                float dmg = e.GetColorVal() ? 3f : 7f;
+                dmg *= (charge*1.5f);
+                AttackData data = new AttackData(dmg, 1.5f, 2f * charge);
+                e.TakeDamage(data);
             }
+            
 
             if (timer > charge*1.2) {
                 rb.velocity = Vector2.zero;
@@ -161,7 +219,15 @@ public class PlayerScript : MonoBehaviour
     }
 
     private void TakeDamage(AttackData attackData) {
-        Debug.Log("Damage Recieved: " + attackData.damagePerHit + " - Knockback Recieved: " + attackData.knockbackDistance + " - Stun Duration Recieved: " + attackData.stunDuration);
+        //Debug.Log("Damage Recieved: " + attackData.damagePerHit + " - Knockback Recieved: " + attackData.knockbackDistance + " - Stun Duration Recieved: " + attackData.stunDuration);
+        health -= attackData.damagePerHit;
+
+        if (health <= 0 ) {
+            //endgame phase
+            GameObject.Find("GameManager").GetComponent<GameManager>().EndGame();
+        }
+        GetStunned(attackData.stunDuration);
+        transform.position += new Vector3(attackData.knockbackDistance/2f, attackData.knockbackDistance/2f, 0.0f);
     }
 
     private void YangAnimEnd() {
@@ -171,11 +237,40 @@ public class PlayerScript : MonoBehaviour
         animator.SetBool("LeftPunch", false);
         //start upercut here
         animator.SetBool("Uppercut", true);
-        
+
+        Collider2D[] hitE = Physics2D.OverlapCircleAll(attackPoint.position, .5f, enemyLayers);
+        foreach(Collider2D enemy in hitE) {
+            BasicEnemyController e = enemy.GetComponent<BasicEnemyController>();
+            if (e.isStunned()) {
+                break;
+            }
+
+            float dmg = e.GetColorVal() ? 5f : 3f;
+            e.TakeDamage(new AttackData(dmg, 1f, 1f));
+        }
+        isPunching = false;
     }
 
     private void EndUpper() {
         animator.SetBool("Uppercut", false);
     }
 
+    private void GetStunned(float dur) {
+        isLunging = false;
+        isCharging = false;
+        stunned = true;
+        StartCoroutine(stunTimer(dur));
+    }
+    private IEnumerator stunTimer(float duration) 
+    {
+
+        yield return new WaitForSeconds(duration);
+        stunned = false;
+
+    }
+    private void SetOrbPos() {
+        Vector3 tarPos = transform.position - new Vector3(1f  * dir, 0, 0f);
+        orbObject.transform.position = Vector3.Lerp(orbObject.transform.position, tarPos, Time.deltaTime * 4f);
+        orbObject.transform.position = new Vector3(orbObject.transform.position.x, orbObject.transform.position.y, this.transform.position.z);
+    }
 }
