@@ -146,7 +146,7 @@ public class PlayerScript : MonoBehaviour
                 foreach(Collider2D enemy in hitEnemies) {
                     BasicEnemyController currE = enemy.GetComponent<BasicEnemyController>();
                     float dmg = enemy.GetComponent<BasicEnemyController>().GetColorVal() ? 5f : 2f;
-                    currE.TakeDamage(new AttackData(dmg, .5f, .4f));
+                    currE.TakeDamage(new AttackData(dmg, .5f, .6f));
                 }
 
                 nextHit = Time.time + hitRate;
@@ -225,6 +225,7 @@ public class PlayerScript : MonoBehaviour
         if (health <= 0 ) {
             //endgame phase
             GameObject.Find("GameManager").GetComponent<GameManager>().EndGame();
+            Destroy(this);
         }
         GetStunned(attackData.stunDuration);
         transform.position += new Vector3(attackData.knockbackDistance/2f, attackData.knockbackDistance/2f, 0.0f);

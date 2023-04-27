@@ -341,7 +341,7 @@ MonoBehaviour:
   attackRange: 1
   speed: 1.5
   rateOfAttack: 2
-  maxHealth: 50
+  maxHealth: 30
   damagePerHit: 6
   knockbackDistance: 2
   stunDuration: 2

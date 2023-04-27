@@ -194,13 +194,15 @@ public class BasicEnemyController : MonoBehaviour
 
             GameObject.Find("GameManager").GetComponent<GameManager>().totalEnemiesKilled++;
 
+            GameObject.Find("GameManager").GetComponent<GameManager>().AdjustEnemyCount();
+
             Destroy(this.gameObject);
 
         }
 
         GetStunned(data.stunDuration); //stun
         
-        transform.position-=new Vector3(data.knockbackDistance/2f, data.knockbackDistance/1.25f, 0.0f); //knockback
+        transform.position += new Vector3(data.knockbackDistance/2f, data.knockbackDistance/1.25f, 0.0f); //knockback
 
         UpdateHealthBar();
 

@@ -54,6 +54,7 @@ public class UIManager : MonoBehaviour
     {
         
         NavigateMenu();
+        NavigateGameOverMenu();
         
     }
 

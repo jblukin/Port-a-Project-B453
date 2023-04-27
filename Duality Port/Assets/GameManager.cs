@@ -87,12 +87,16 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void AdjustEnemyCount() //To be called in a SendMessage when an Enemy dies
+    public void AdjustEnemyCount() //To be called in a SendMessage when an Enemy dies
     {
 
         enemiesRemaining--;
 
         this.gameObject.GetComponent<UIManager>().UpdateHUD(currentRound, enemiesRemaining);
+
+        if (enemiesRemaining <= 0 ) {
+            UpdateGame();
+        }
 
     }
 
