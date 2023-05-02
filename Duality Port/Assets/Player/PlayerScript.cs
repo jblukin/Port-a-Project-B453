@@ -39,6 +39,8 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] GameObject orbObject;
     [SerializeField] GameObject shadow;
     [SerializeField] GameObject bar;
+    [SerializeField] GameObject barHP;
+    [SerializeField] GameObject textPrefab;
 
     private float apex = 5.45f, st = 2.275f;//Hard coded values, if position of object change, this needs to as well
     
@@ -64,6 +66,7 @@ public class PlayerScript : MonoBehaviour
         animEnd = true;
         stunned = false;
         aS = GetComponent<AudioSource>();
+        aS.volume = .5f;
     }
 
     // Update is called once per fram6f
@@ -80,6 +83,9 @@ public class PlayerScript : MonoBehaviour
 
         bar.SetActive(false);
         bar.transform.GetChild(0).GetComponent<Image>().fillAmount = timer / 1;
+
+        barHP.SetActive(true);
+        barHP.transform.GetChild(0).GetComponent<Image>().fillAmount = health/100f;
 
         shadowOpac = 1 - ((transform.position.y - st) / (apex - st));
         shadow.transform.position = new Vector3(transform.position.x, st - .6f, transform.position.z + 1);    
@@ -117,13 +123,10 @@ public class PlayerScript : MonoBehaviour
 
         if(Input.GetButton("YangAttack")) {
             orbAni.SetBool("isYang", true);
-            hitRate = .5f;
+            hitRate = .35f;
             isPunching = true;
-            aS.Stop();
-            if (!aS.isPlaying) {
-                aS.clip = clips[Random.Range(2, 5)];
-                aS.Play();
-            }
+            
+            
             animator.SetBool("IsYang", true);
             isYang = true;
             animEnd = false;
@@ -146,11 +149,16 @@ public class PlayerScript : MonoBehaviour
                 foreach(Collider2D enemy in hitEnemies) {
                     BasicEnemyController currE = enemy.GetComponent<BasicEnemyController>();
                     float dmg = enemy.GetComponent<BasicEnemyController>().GetColorVal() ? 5f : 2f;
-                    currE.TakeDamage(new AttackData(dmg, .5f, .6f));
+                    currE.TakeDamage(new AttackData(dmg, .5f, .9f));
+
+                    SpawnText(enemy.transform.position, Mathf.Round(dmg).ToString());
                 }
 
                 nextHit = Time.time + hitRate;
             }
+        }if (Input.GetButtonUp("YangAttack")) {
+                aS.clip = clips[Random.Range(2, 5)];
+                aS.Play();
         }
         if (Input.GetButton("YinAttack")) {
             orbAni.SetBool("isYang", false);
@@ -202,6 +210,8 @@ public class PlayerScript : MonoBehaviour
                 dmg *= (charge*1.5f);
                 AttackData data = new AttackData(dmg, 1.5f, 2f * charge);
                 e.TakeDamage(data);
+
+                SpawnText(enemy.transform.position, Mathf.Round(dmg).ToString());
             }
             
 
@@ -248,6 +258,8 @@ public class PlayerScript : MonoBehaviour
 
             float dmg = e.GetColorVal() ? 5f : 3f;
             e.TakeDamage(new AttackData(dmg, 1f, 1f));
+
+            SpawnText(e.transform.position, Mathf.Round(dmg).ToString());
         }
         isPunching = false;
     }
@@ -264,7 +276,6 @@ public class PlayerScript : MonoBehaviour
     }
     private IEnumerator stunTimer(float duration) 
     {
-
         yield return new WaitForSeconds(duration);
         stunned = false;
 
@@ -273,5 +284,10 @@ public class PlayerScript : MonoBehaviour
         Vector3 tarPos = transform.position - new Vector3(1f  * dir, 0, 0f);
         orbObject.transform.position = Vector3.Lerp(orbObject.transform.position, tarPos, Time.deltaTime * 4f);
         orbObject.transform.position = new Vector3(orbObject.transform.position.x, orbObject.transform.position.y, this.transform.position.z);
+    }
+
+    public void SpawnText(Vector3 pos, string dmg) {
+        GameObject newText = Instantiate(textPrefab, pos, Quaternion.identity);
+        newText.GetComponent<DamageIndicator>().SetText(dmg);
     }
 }
