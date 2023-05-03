@@ -7,7 +7,7 @@ public class PlayerScript : MonoBehaviour
 {   
     private int moveSpeed;
     private int dir;
-    private float health;
+    public float health { get; set; }
     private float charge;
     private float horizontal;
     private float slideSpeed;
@@ -67,6 +67,9 @@ public class PlayerScript : MonoBehaviour
         stunned = false;
         aS = GetComponent<AudioSource>();
         aS.volume = .5f;
+
+        barHP.SetActive(true);
+
     }
 
     // Update is called once per fram6f
@@ -84,7 +87,6 @@ public class PlayerScript : MonoBehaviour
         bar.SetActive(false);
         bar.transform.GetChild(0).GetComponent<Image>().fillAmount = timer / 1;
 
-        barHP.SetActive(true);
         barHP.transform.GetChild(0).GetComponent<Image>().fillAmount = health/100f;
 
         shadowOpac = 1 - ((transform.position.y - st) / (apex - st));
@@ -232,10 +234,12 @@ public class PlayerScript : MonoBehaviour
         //Debug.Log("Damage Recieved: " + attackData.damagePerHit + " - Knockback Recieved: " + attackData.knockbackDistance + " - Stun Duration Recieved: " + attackData.stunDuration);
         health -= attackData.damagePerHit;
 
-        if (health <= 0 ) {
+        if (health <= 0) {
             //endgame phase
             GameObject.Find("GameManager").GetComponent<GameManager>().EndGame();
-            Destroy(this);
+            bar.SetActive(false);
+            barHP.SetActive(false);
+            //Destroy(this.gameObject);
         }
         GetStunned(attackData.stunDuration);
         transform.position += new Vector3(attackData.knockbackDistance/2f, attackData.knockbackDistance/2f, 0.0f);
@@ -289,5 +293,11 @@ public class PlayerScript : MonoBehaviour
     public void SpawnText(Vector3 pos, string dmg) {
         GameObject newText = Instantiate(textPrefab, pos, Quaternion.identity);
         newText.GetComponent<DamageIndicator>().SetText(dmg);
+    }
+
+    void OnEnable() {
+
+        barHP.SetActive(true);
+
     }
 }

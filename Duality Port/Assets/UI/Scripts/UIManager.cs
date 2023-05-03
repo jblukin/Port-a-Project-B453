@@ -54,6 +54,7 @@ public class UIManager : MonoBehaviour
     {
         
         NavigateMenu();
+
         NavigateGameOverMenu();
         
     }
@@ -61,10 +62,9 @@ public class UIManager : MonoBehaviour
     void NavigateMenu()
     {
 
-        if(!playing && _onMainMenu)
+        if(!playing && _onMainMenu) {
+
             if(Input.GetKeyDown(KeyCode.W)) {
-
-
 
                 _menuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[0];
 
@@ -111,9 +111,8 @@ public class UIManager : MonoBehaviour
                     SelectOption(_currentMenuIndex);
                 else if(_onMainMenu && !_onMenuList)
                     OpenMainMenu();
-        
-            else NavigateGameOverMenu();
             
+        }
 
     }
 
@@ -127,7 +126,7 @@ public class UIManager : MonoBehaviour
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[0];
 
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
-                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+                    new Vector2(_gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
 
 
 
@@ -138,14 +137,14 @@ public class UIManager : MonoBehaviour
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[1];
 
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
-                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+                    new Vector2(_gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
 
             } else if(Input.GetKeyDown(KeyCode.S)) {
 
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[0];
 
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
-                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+                    new Vector2(_gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
 
 
 
@@ -156,21 +155,47 @@ public class UIManager : MonoBehaviour
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[1];
 
                 _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
-                    new Vector2(_menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _menuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+                    new Vector2(_gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
 
-            } else if(Input.GetKeyDown(KeyCode.J))
-                if(_currentMenuIndex == 0)
+            } else if(Input.GetKeyDown(KeyCode.J)) {
+
+                if(_currentMenuIndex == 0) {
+
+                    this.gameObject.GetComponent<GameManager>().PlayMenuSound(4); //Menu Select sound plays
                     StartGame();
-                else if(_currentMenuIndex == 1)
+
+                }
+
+                else if(_currentMenuIndex == 1) {
+
+                    _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[0];
+
+                    _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
+                        new Vector2(_gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x + 25, _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+
+                    _currentMenuIndex = 0;
+
+                    _gameOverMenuItems[_currentMenuIndex].GetComponent<Image>().sprite = _menuItemSprites[1];
+
+                    _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position = 
+                        new Vector2(_gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.x - 25, _gameOverMenuItems[_currentMenuIndex].GetComponent<RectTransform>().position.y);
+
                     OpenMainMenu();
+
+                }
+
                 else if(_currentMenuIndex == 2)
                     Application.Quit();
+            }
         }
 
     }
 
     int SwitchMenuItem(bool UpOrDown) //If recieves true, selected menu item-1 [MOVES UP MENU - bottom to top] (if false, menu item+1)
     {
+
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(3); //Menu Option Switch sound plays
+
         if(UpOrDown && _currentMenuIndex == 0 && _onMainMenu) //sets menu index to last menu item on main menu
             return 4;
         else if(!UpOrDown && _currentMenuIndex == 4 && _onMainMenu) //sets menu index to first menu item on main menu
@@ -228,13 +253,17 @@ public class UIManager : MonoBehaviour
         else if(index == 4)
             Application.Quit();
 
+        
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(4); //Menu Select sound plays
+
     }
 
     void StartGame()
     {
         
-        OpenHUD();
         this.gameObject.GetComponent<GameManager>().StartGame();
+        playing = true;
+        OpenHUD();
         
     }
 
@@ -275,10 +304,15 @@ public class UIManager : MonoBehaviour
         _ContainerReferences[2].SetActive(false);
         _ContainerReferences[3].SetActive(false);
         _ContainerReferences[4].SetActive(false);
+        _ContainerReferences[5].SetActive(false);
+        _ContainerReferences[6].SetActive(false);
+        _ContainerReferences[7].SetActive(false);
 
         _onMainMenu = true;
 
         _onMenuList = true;
+
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(4); //Menu Select sound plays
 
     }
 
@@ -290,7 +324,6 @@ public class UIManager : MonoBehaviour
         _ContainerReferences[3].SetActive(false);
         _ContainerReferences[4].SetActive(false);
         _ContainerReferences[5].SetActive(false);
-        _ContainerReferences[6].SetActive(false);
         _ContainerReferences[7].SetActive(true);
 
     }
@@ -298,7 +331,7 @@ public class UIManager : MonoBehaviour
     void RunInBetweenRoundUI(float countdownDuration)
     {
 
-        Debug.Log("Running in between rounds");
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(2); //Round Cleared sound plays
 
         _maxCountdownDuration = countdownDuration;
 
@@ -306,7 +339,8 @@ public class UIManager : MonoBehaviour
 
         _ContainerReferences[6].SetActive(true);
 
-        StartCoroutine(InBetweenRoundInitialTextTimer(_maxCountdownDuration));
+        if(!IsInvoking("InBetweenRoundInitialTextTimer"))
+            StartCoroutine(InBetweenRoundInitialTextTimer(_maxCountdownDuration));
 
     }
 
@@ -319,7 +353,7 @@ public class UIManager : MonoBehaviour
 
     }
 
-    private IEnumerator InBetweenRoundInitialTextTimer(float duration) //Shows Clear Round Text, then starts Round Countdown
+    private IEnumerator InBetweenRoundInitialTextTimer(float duration) //Shows Clear Round Text, then starts Round Countdown (YAME)
     {
         if(GameObject.Find("GameManager").GetComponent<GameManager>().currentRound == 1) {
 
@@ -329,6 +363,8 @@ public class UIManager : MonoBehaviour
 
             _betweenRoundUITextReferences[2].SetActive(false); //Tertiary Text Inactive
 
+            _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(false); //Countdown Bar Inactive
+
         } else {
 
             _betweenRoundUITextReferences[0].SetActive(true); //Initial Text Active
@@ -337,13 +373,19 @@ public class UIManager : MonoBehaviour
 
             _betweenRoundUITextReferences[2].SetActive(false); //Tertiary Text Inactive
 
+            _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(false); //Countdown Bar Inactive
+
         }
+
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(1); //YAME sound plays
 
         yield return new WaitForSeconds(1.0f); //Wait
 
         _betweenRoundUITextReferences[0].SetActive(false); //Initial Text Inactive
 
         _betweenRoundUITextReferences[1].SetActive(true);  //Secondary Text Active
+
+        _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(true); //Countdown Bar Active
 
         //Tertiary Text remains Inactive
 
@@ -354,7 +396,7 @@ public class UIManager : MonoBehaviour
     private IEnumerator RoundStartCountdownTimer(float duration) //Counts down to start of round, and displays the countdown in a decreasing progress bar - starts tertiary text display sequence at end
     {
 
-        InvokeRepeating("AdjustCountdownBarFillAmount", 0.0f, Time.deltaTime);
+        InvokeRepeating("AdjustCountdownBarFillAmount", 0.0f, 0.5f * duration * Time.deltaTime);
 
         yield return new WaitForSeconds(duration);
 
@@ -375,7 +417,7 @@ public class UIManager : MonoBehaviour
 
     }
 
-    private IEnumerator InBetweenRoundTertiaryTextTimer() //Displays round start text briefly, then resets In Between Round UI and closes it
+    private IEnumerator InBetweenRoundTertiaryTextTimer() //Displays round start text briefly, then resets In Between Round UI and closes it (HAJIME)
     {
         _betweenRoundUITextReferences[0].SetActive(false); //Initial Text Inactive
 
@@ -384,6 +426,8 @@ public class UIManager : MonoBehaviour
         _betweenRoundUITextReferences[2].SetActive(true); //Tertiary Text Active
 
         _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(false); //Countdown Bar Inactive
+
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(0); //HAJIME sound plays
 
         yield return new WaitForSeconds(1.0f); //Wait
 
@@ -398,6 +442,38 @@ public class UIManager : MonoBehaviour
         _ContainerReferences[6].SetActive(false); //Container Inactive/Closed
 
     }
+
+    private IEnumerator EndScreenDisplay()
+    {
+
+        _ContainerReferences[6].SetActive(true);
+
+        _betweenRoundUITextReferences[0].SetActive(true); //Initial Text Active (SHOW YAME)
+
+        _betweenRoundUITextReferences[1].SetActive(false); //Secondary Text Inactive (HIDE since in Container 6)
+
+        _betweenRoundUITextReferences[2].SetActive(false); //Tertiary Text Inactive (HIDE since in Container 6)
+
+        _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(false); //Countdown Bar Inactive (HIDE since in Container 6)
+
+        yield return new WaitForSeconds(1.0f);
+
+        _resultsTextReferences[0].GetComponent<TextMeshProUGUI>().text = "ROUNDS CLEARED: " + (this.gameObject.GetComponent<GameManager>().currentRound - 1);
+
+        _resultsTextReferences[1].GetComponent<TextMeshProUGUI>().text = "FOES DEFEATED: " + this.gameObject.GetComponent<GameManager>().totalEnemiesKilled;
+
+        _resultsTextReferences[2].GetComponent<TextMeshProUGUI>().text = "DAMAGE DEALT: " + Mathf.Floor(this.gameObject.GetComponent<GameManager>().totalDamageDealt); //Floor functions sets to int below for readability
+
+        _betweenRoundUICountdownBarRef.transform.parent.gameObject.SetActive(false); //Countdown Bar Active (Reset Container 6 State)
+
+        _ContainerReferences[7].SetActive(false);
+
+        _ContainerReferences[6].SetActive(false);
+
+        _ContainerReferences[5].SetActive(true);
+
+    }
+
     void OpenEndGameScreen() //To be used in SendMessage from GameManager
     {
 
@@ -407,15 +483,9 @@ public class UIManager : MonoBehaviour
 
         _onMainMenu = false;
 
-        _resultsTextReferences[0].GetComponent<TextMeshProUGUI>().text = "ROUNDS CLEARED: " + (this.gameObject.GetComponent<GameManager>().currentRound - 1);
+        this.gameObject.GetComponent<GameManager>().PlayMenuSound(1); //YAME sound plays
 
-        _resultsTextReferences[1].GetComponent<TextMeshProUGUI>().text = "FOES DEFEATED: " + this.gameObject.GetComponent<GameManager>().totalEnemiesKilled;
-
-        _resultsTextReferences[2].GetComponent<TextMeshProUGUI>().text = "DAMAGE DEALT: " + this.gameObject.GetComponent<GameManager>().totalDamageDealt;
-
-        _ContainerReferences[7].SetActive(false);
-
-        _ContainerReferences[5].SetActive(true);
+        StartCoroutine("EndScreenDisplay");
 
     }
 

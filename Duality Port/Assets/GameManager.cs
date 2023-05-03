@@ -15,16 +15,21 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Transform[] enemySpawnerTransforms = new Transform[2];
 
+    [SerializeField] private AudioClip[] UIAudioReferences = new AudioClip[5]; //0 = HAJIME, 1 = YAME, 2 = Round Clear, 3 = Menu Select, 4 = Menu Option Switch
+
     [SerializeField] private GameObject playerReference;
+
     [SerializeField] private GameObject orbReference;
 
     private Transform[] enemySpawnPoints = new Transform[2];
+
+    private AudioSource audioSource;
 
     public int totalEnemiesKilled { get; set; }
 
     public int currentRound { get; private set; }
 
-    public float totalDamageDealt { get; set; } //To be referenced by the player alongside each call of the SendMessage("TakeDamage") to the enemies (+= damage dealt - after multipliers)
+    public float totalDamageDealt { get; set; }
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +42,8 @@ public class GameManager : MonoBehaviour
 
         totalEnemiesKilled = 0;
 
+        audioSource = this.gameObject.GetComponent<AudioSource>();
+
     }
 
     public void StartGame() //To be called using SendMessage from UIManager
@@ -45,6 +52,12 @@ public class GameManager : MonoBehaviour
         playerReference.SetActive(true);
 
         orbReference.SetActive(true);
+
+        currentRound = 0; //Starts at 0, updated to 1 before first round starts
+
+        totalDamageDealt = 0.0f;
+
+        totalEnemiesKilled = 0;
 
         UpdateGame();
 
@@ -55,8 +68,6 @@ public class GameManager : MonoBehaviour
 
         InvokeRepeating("SpawnEnemies", 1.0f, Random.Range(1.5f, 2.5f));
 
-        if(!IsInvoking("SpawnEnemies") && enemiesRemaining == 0)
-            UpdateGame();
     }
 
     void SpawnEnemies() 
@@ -73,15 +84,13 @@ public class GameManager : MonoBehaviour
     void UpdateGame() //Change info between rounds
     {
 
-        Debug.Log("Updating Game");
+        this.gameObject.SendMessage("RunInBetweenRoundUI", roundCountdownDuration);  //shows between round UI and updates HUD for next rounds (use UI manager)
 
         currentRound++;
 
         enemiesRemaining = currentRound + 4;
 
         enemiesToSpawn = enemiesRemaining;
-
-        this.gameObject.SendMessage("RunInBetweenRoundUI", roundCountdownDuration);  //shows between round UI and updates HUD for next rounds (use UI manager)
 
         this.gameObject.GetComponent<UIManager>().UpdateHUD(currentRound, enemiesRemaining);
 
@@ -94,9 +103,8 @@ public class GameManager : MonoBehaviour
 
         this.gameObject.GetComponent<UIManager>().UpdateHUD(currentRound, enemiesRemaining);
 
-        if (enemiesRemaining <= 0 ) {
+        if(!IsInvoking("SpawnEnemies") && enemiesRemaining == 0)
             UpdateGame();
-        }
 
     }
 
@@ -105,5 +113,23 @@ public class GameManager : MonoBehaviour
 
         this.gameObject.SendMessage("OpenEndGameScreen");
 
+        if(IsInvoking("SpawnEnemies"))
+            CancelInvoke("SpawnEnemies");
+
+        orbReference.SetActive(false);
+
+        playerReference.SetActive(false);
+
+        playerReference.GetComponent<PlayerScript>().health = 100f;
+
     }
+
+    public void PlayMenuSound(int index) { //0 = HAJIME, 1 = YAME, 2 = Round Clear, 3 = Menu Select, 4 = Menu Option Switch
+
+        audioSource.clip = UIAudioReferences[index];
+
+        audioSource.Play();
+
+    }
+
 }

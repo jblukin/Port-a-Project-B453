@@ -8,6 +8,8 @@ public class BasicEnemyController : MonoBehaviour
 
     private GameObject playerReference;
 
+    [SerializeField] private AudioClip[] enemyAudioReferences = new AudioClip[2];
+
     private GameObject healthBarReference;
 
     private GameObject canvasReference;
@@ -33,6 +35,8 @@ public class BasicEnemyController : MonoBehaviour
     [SerializeField] private float stunDuration;
 
     private Animator anim;
+
+    private AudioSource audioSource;
 
     private bool attacking;
 
@@ -63,27 +67,35 @@ public class BasicEnemyController : MonoBehaviour
 
         health = maxHealth;
 
+        audioSource = this.gameObject.GetComponent<AudioSource>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        /*Temporary Code to prevent error when testing animation and movement*/
-        if(playerReference == null) {
+        if(playerReference.activeSelf) {
 
-            playerReference = GameObject.FindGameObjectWithTag("Player");
+            FlipDir();
 
-        }
-
-        FlipDir();
-
-        Animate();
+            Animate();
         
-        if(GetDistanceFromPlayer() <= attackRange && attackTimer < Time.time && !stunned)
-            Attack();
-        else if(GetDistanceFromPlayer() > attackRange && !stunned)
-            Move();
+            if(GetDistanceFromPlayer() <= attackRange && attackTimer < Time.time && !stunned) {
+
+                Attack();
+
+            } else if(GetDistanceFromPlayer() > attackRange && !stunned) {
+
+                Move();
+
+            }
+
+        } else { 
+            
+            Destroy(this.gameObject);
+            
+        }
 
     }
 
@@ -119,16 +131,20 @@ public class BasicEnemyController : MonoBehaviour
 
             if(collider.gameObject.CompareTag("Player")) {
 
+                audioSource.clip = enemyAudioReferences[0];
+
+                audioSource.Play();
+
                 if(playerReference.GetComponent<PlayerScript>().isYang) //Black Player
                     if(colorVal) //Black Enemy - Less Damage Against Player
-                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, knockbackDistance, stunDuration));
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, 0f, stunDuration));
                     else //White Enemy - Extra Damage Against Player
-                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, knockbackDistance, stunDuration));
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, 0f, stunDuration));
                 else //White Player
                     if(colorVal) //Black Enemy - Extra Damage Against Player
-                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, knockbackDistance, stunDuration));
+                        playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*1.25f, 0f, stunDuration));
                     else //White Enemy - Less Damage Against Player
-                         playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, knockbackDistance, stunDuration));
+                         playerReference.SendMessage("TakeDamage", new AttackData(damagePerHit*0.75f, 0f, stunDuration));
 
             }
 
@@ -196,13 +212,17 @@ public class BasicEnemyController : MonoBehaviour
 
             GameObject.Find("GameManager").GetComponent<GameManager>().AdjustEnemyCount();
 
+            audioSource.clip = enemyAudioReferences[1];
+
+            audioSource.Play();
+
             Destroy(this.gameObject);
 
         }
 
         GetStunned(data.stunDuration); //stun
         
-        transform.position += new Vector3(data.knockbackDistance/2f, data.knockbackDistance/1.25f, 0.0f); //knockback
+        transform.position += new Vector3(data.knockbackDistance/1.5f, data.knockbackDistance/2f, 0.0f); //knockback
 
         UpdateHealthBar();
 
@@ -252,7 +272,9 @@ public class BasicEnemyController : MonoBehaviour
     }
 
     public bool isStunned() {
+
         return stunned;
+
     }
 
 }
